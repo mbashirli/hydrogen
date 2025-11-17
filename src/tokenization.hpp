@@ -16,10 +16,11 @@ struct Token {
 
 class Tokenizer {
 public:
-    inline Tokenizer(std::string src) : m_src(std::move(src)) {
+    explicit Tokenizer(std::string src) : m_index(0),
+                                          m_src(std::move(src)) {
     }
 
-    inline std::vector<Token> tokenize() {
+    std::vector<Token> tokenize() {
         std::vector<Token> tokens;
         std::string buf;
         while (peek().has_value()) {
@@ -50,6 +51,7 @@ public:
             }
 
             if (peek().value() == ';') {
+                consume();
                 tokens.push_back({.type = TokenType::semi});
                 continue;
             }
@@ -64,13 +66,13 @@ public:
             std::cerr << "Invalid syntax!" << std::endl;
             exit(EXIT_FAILURE);
         }
-
+        m_index = 0;
         return tokens;
     }
 
 private:
-    [[nodiscard]] std::optional<char> peek() const {
-        if (m_index + 1 >= m_src.length()) {
+    [[nodiscard]] std::optional<char> peek(int ahead = 1) const {
+        if (m_index + ahead > m_src.length()) {
             return {};
         }
         return m_src.at(m_index);
