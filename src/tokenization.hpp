@@ -57,9 +57,7 @@ public:
             }
 
             if (std::isspace(peek().value())) {
-                while (std::isspace(peek().value())) {
-                    consume();
-                }
+                consume();
                 continue;
             }
 
@@ -82,6 +80,6 @@ private:
         return m_src.at(m_index++);
     }
 
-    int m_index;
+    size_t m_index;
     const std::string m_src;
 };

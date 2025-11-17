@@ -1,8 +1,10 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <vector>
+
+#include "generation.hpp"
 #include "tokenization.hpp"
+#include "parser.hpp"
 
 
 int main(int argc, char *argv[]) {
@@ -21,6 +23,24 @@ int main(int argc, char *argv[]) {
     contents = strstream.str();
 
     Tokenizer tokenizer(std::move(contents));
+    std::vector<Token> tokens = tokenizer.tokenize();
+    Parser parser(std::move(tokens));
+    std::optional<NodeExit> tree = parser.parse();
+
+    if (!tree.has_value()) {
+        std::cerr << "NO EXIT STATEMENT FOUND!!" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    Generator generator(tree.value());
+
+    {
+        std::fstream file("out.asm", std::ios::out);
+        file << generator.generate();
+    }
+
+    system("nasm -felf64 out.asm");
+    system("/usr/bin/ld -o out out.o");
 
     return EXIT_SUCCESS;
 }
