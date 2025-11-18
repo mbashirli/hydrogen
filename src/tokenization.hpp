@@ -6,7 +6,9 @@
 enum class TokenType {
     exit,
     int_lit,
-    semi
+    semi,
+    open_paren,
+    close_paren
 };
 
 struct Token {
@@ -50,6 +52,18 @@ public:
                 continue;
             }
 
+            if (peek().value() == '(') {
+                consume();
+                tokens.push_back({.type = TokenType::open_paren});
+                continue;
+            }
+
+            if (peek().value() == ')') {
+                consume();
+                tokens.push_back({.type = TokenType::close_paren});
+                continue;
+            }
+
             if (peek().value() == ';') {
                 consume();
                 tokens.push_back({.type = TokenType::semi});
@@ -69,8 +83,8 @@ public:
     }
 
 private:
-    [[nodiscard]] std::optional<char> peek(int ahead = 1) const {
-        if (m_index + ahead > m_src.length()) {
+    [[nodiscard]] std::optional<char> peek(int offset = 0) const {
+        if (m_index + offset >= m_src.length()) {
             return {};
         }
         return m_src.at(m_index);
